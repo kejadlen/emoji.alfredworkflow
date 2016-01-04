@@ -20,6 +20,7 @@ module Emoji
       etc = etc.join(", ")
       Alphred::Item.new(
         title: self.name,
+        uid: self.name,
         subtitle: etc,
         arg: JSON.dump(unicode: self.raw, code: self.code),
         icon: File.join(Emoji.images_path, "emoji", self.image_filename),

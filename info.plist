@@ -10,42 +10,6 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>6D5D9CA0-5A68-48BD-86CB-FE41DF6F0D5F</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>8899A913-7F3C-42F8-A9DB-79560FDB43E2</string>
-				<key>modifiers</key>
-				<integer>262144</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
-		<key>6D5D9CA0-5A68-48BD-86CB-FE41DF6F0D5F</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>52E6556C-14D2-4D85-8BDD-4B13B2B5943D</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
-		<key>8899A913-7F3C-42F8-A9DB-79560FDB43E2</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
 				<string>52E6556C-14D2-4D85-8BDD-4B13B2B5943D</string>
 				<key>modifiers</key>
 				<integer>0</integer>
@@ -80,31 +44,6 @@
 			<string>alfred.workflow.output.clipboard</string>
 			<key>uid</key>
 			<string>52E6556C-14D2-4D85-8BDD-4B13B2B5943D</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string># encoding: utf-8
-require "json"
-print JSON.load("{query}")["unicode"]</string>
-				<key>scriptargtype</key>
-				<integer>0</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>type</key>
-				<integer>2</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>6D5D9CA0-5A68-48BD-86CB-FE41DF6F0D5F</string>
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
@@ -151,31 +90,6 @@ print JSON.load("{query}")["unicode"]</string>
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>script</key>
-				<string># encoding: utf-8
-require "json"
-print JSON.load("{query}")["code"]</string>
-				<key>scriptargtype</key>
-				<integer>0</integer>
-				<key>scriptfile</key>
-				<string></string>
-				<key>type</key>
-				<integer>2</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>8899A913-7F3C-42F8-A9DB-79560FDB43E2</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
 	</array>
 	<key>readme</key>
 	<string></string>
@@ -184,30 +98,16 @@ print JSON.load("{query}")["code"]</string>
 		<key>0744A6DC-F5C1-4D81-8056-8C281A5494D2</key>
 		<dict>
 			<key>xpos</key>
-			<integer>300</integer>
+			<integer>210</integer>
 			<key>ypos</key>
-			<real>10</real>
+			<integer>170</integer>
 		</dict>
 		<key>52E6556C-14D2-4D85-8BDD-4B13B2B5943D</key>
 		<dict>
 			<key>xpos</key>
-			<integer>700</integer>
+			<integer>550</integer>
 			<key>ypos</key>
-			<real>10</real>
-		</dict>
-		<key>6D5D9CA0-5A68-48BD-86CB-FE41DF6F0D5F</key>
-		<dict>
-			<key>xpos</key>
-			<integer>500</integer>
-			<key>ypos</key>
-			<real>10</real>
-		</dict>
-		<key>8899A913-7F3C-42F8-A9DB-79560FDB43E2</key>
-		<dict>
-			<key>xpos</key>
-			<integer>500</integer>
-			<key>ypos</key>
-			<real>130</real>
+			<integer>170</integer>
 		</dict>
 	</dict>
 	<key>webaddress</key>

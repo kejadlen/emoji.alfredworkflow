@@ -86,7 +86,7 @@ impl Workflow {
         let res = self.client.get(url).send().unwrap();
 
         let doc = Document::from_read(res).unwrap();
-        doc.find(Class("search-results").descendant(Name("a")))
+        doc.find(Class("search-results").descendant(Name("h2").descendant(Name("a"))))
             .map(|node| {
                      let href = node.attr("href").unwrap().to_string();
                      let mut children = node.children();

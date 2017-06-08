@@ -28,7 +28,7 @@ fn main() {
     let mut items = vec![];
     results
         .par_iter()
-        .map(|ref search_result| {
+        .map(|search_result| {
             let uid = search_result.emoji.clone();
             let title = search_result.text.clone();
             let arg = search_result.emoji.clone();
@@ -60,7 +60,7 @@ struct Workflow {
 
 impl Workflow {
     fn new() -> Self {
-        let cache_dir = env::var("alfred_workflow_cache").unwrap_or(".cache".into());
+        let cache_dir = env::var("alfred_workflow_cache").unwrap_or_else(|_| ".cache".into());
         let cache_path = Path::new(&cache_dir);
         if !cache_path.exists() {
             fs::create_dir_all(cache_path).unwrap();
@@ -98,7 +98,7 @@ impl Workflow {
     }
 
     fn download_image(&self, href: &str) -> PathBuf {
-        let url = self.base_url.join(&href).unwrap();
+        let url = self.base_url.join(href).unwrap();
         let res = self.client.get(url).send().unwrap();
 
         let doc = Document::from_read(res).unwrap();

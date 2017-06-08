@@ -1,6 +1,5 @@
-extern crate hyper;
-extern crate hyper_native_tls;
 extern crate rayon;
+extern crate reqwest;
 extern crate select;
 extern crate serde;
 extern crate serde_json;
@@ -12,10 +11,8 @@ use std::{env, fs};
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 
-use hyper::{Client, Url};
-use hyper::net::HttpsConnector;
-use hyper_native_tls::NativeTlsClient;
 use rayon::prelude::*;
+use reqwest::Url;
 use select::document::Document;
 use select::predicate::{Class, Name, Predicate};
 
@@ -54,7 +51,6 @@ fn main() {
 
 struct Workflow {
     cache_path_buf: PathBuf,
-    client: Client,
     base_url: Url,
 }
 
@@ -67,15 +63,10 @@ impl Workflow {
         }
         let cache_path_buf = cache_path.to_path_buf();
 
-        let ssl = NativeTlsClient::new().unwrap();
-        let connector = HttpsConnector::new(ssl);
-        let client = Client::with_connector(connector);
-
         let base_url = Url::parse("https://emojipedia.org").unwrap();
 
         Workflow {
             cache_path_buf,
-            client,
             base_url,
         }
     }
@@ -83,7 +74,7 @@ impl Workflow {
     fn search(&self, query: &str) -> Vec<SearchResult> {
         let url = Url::parse_with_params("https://emojipedia.org/search/", &[("q", query)])
             .unwrap();
-        let res = self.client.get(url).send().unwrap();
+        let res = reqwest::get(url).unwrap();
 
         let doc = Document::from_read(res).unwrap();
         doc.find(Class("search-results").descendant(Name("h2").descendant(Name("a"))))
@@ -99,7 +90,7 @@ impl Workflow {
 
     fn download_image(&self, href: &str) -> PathBuf {
         let url = self.base_url.join(href).unwrap();
-        let res = self.client.get(url).send().unwrap();
+        let res = reqwest::get(url).unwrap();
 
         let doc = Document::from_read(res).unwrap();
         let vendor_image = doc.find(Class("vendor-image")).next().unwrap();
@@ -107,7 +98,7 @@ impl Workflow {
         let src = img.attr("src").unwrap();
 
         let url = Url::parse(src).unwrap();
-        let mut res = self.client.get(url).send().unwrap();
+        let mut res = reqwest::get(url).unwrap();
 
         let file_name = href.trim_matches('/');
         let mut file_path = self.cache_path_buf.clone();

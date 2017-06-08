@@ -1,0 +1,13 @@
+[package]
+name = "emoji-alfredworkflow"
+version = "0.1.0"
+authors = ["Alpha Chen <alpha.chen@gmail.com>"]
+
+[dependencies]
+hyper = "*"
+hyper-native-tls = "*"
+rayon = "*"
+select = "*"
+serde = "1.0"
+serde_derive = "*"
+serde_json = "*"

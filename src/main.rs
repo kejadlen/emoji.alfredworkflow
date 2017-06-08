@@ -113,6 +113,11 @@ impl Config {
         let mut file_path = self.cache_path_buf.clone();
         file_path.push(file_name);
         file_path.set_extension("png");
+
+        if file_path.exists() {
+            return file_path
+        }
+
         let mut file = fs::File::create(file_path.clone()).unwrap();
 
         let mut buf = vec![];

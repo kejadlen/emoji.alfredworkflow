@@ -20,10 +20,10 @@ use select::document::Document;
 use select::predicate::{Class, Name, Predicate};
 
 fn main() {
-    let config = Config::new();
+    let workflow = Workflow::new();
 
     let query = env::args().nth(1).unwrap();
-    let results = config.search(&query);
+    let results = workflow.search(&query);
 
     let mut items = vec![];
     results
@@ -32,7 +32,7 @@ fn main() {
             let uid = search_result.emoji.clone();
             let title = search_result.text.clone();
             let arg = search_result.emoji.clone();
-            let path = config
+            let path = workflow
                 .download_image(&search_result.href)
                 .to_str()
                 .unwrap()
@@ -52,13 +52,13 @@ fn main() {
     println!("{}", json);
 }
 
-struct Config {
+struct Workflow {
     cache_path_buf: PathBuf,
     client: Client,
     base_url: Url,
 }
 
-impl Config {
+impl Workflow {
     fn new() -> Self {
         let cache_dir = env::var("alfred_workflow_cache").unwrap_or(".cache".into());
         let cache_path = Path::new(&cache_dir);
@@ -73,7 +73,7 @@ impl Config {
 
         let base_url = Url::parse("https://emojipedia.org").unwrap();
 
-        Config {
+        Workflow {
             cache_path_buf,
             client,
             base_url,
@@ -115,7 +115,7 @@ impl Config {
         file_path.set_extension("png");
 
         if file_path.exists() {
-            return file_path
+            return file_path;
         }
 
         let mut file = fs::File::create(file_path.clone()).unwrap();

@@ -33,23 +33,6 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>autopaste</key>
-				<false/>
-				<key>clipboardtext</key>
-				<string>{query}</string>
-				<key>transient</key>
-				<false/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.output.clipboard</string>
-			<key>uid</key>
-			<string>52E6556C-14D2-4D85-8BDD-4B13B2B5943D</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
 				<key>alfredfiltersresults</key>
 				<false/>
 				<key>argumenttype</key>
@@ -69,7 +52,7 @@
 				<key>runningsubtext</key>
 				<string>Searching emoji...</string>
 				<key>script</key>
-				<string>ruby emoji.rb "{query}"</string>
+				<string>./target/release/emoji-alfredworkflow "{query}"</string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
 				<key>scriptfile</key>
@@ -87,6 +70,23 @@
 			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
 			<string>0744A6DC-F5C1-4D81-8056-8C281A5494D2</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>autopaste</key>
+				<false/>
+				<key>clipboardtext</key>
+				<string>{query}</string>
+				<key>transient</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.clipboard</string>
+			<key>uid</key>
+			<string>52E6556C-14D2-4D85-8BDD-4B13B2B5943D</string>
 			<key>version</key>
 			<integer>2</integer>
 		</dict>

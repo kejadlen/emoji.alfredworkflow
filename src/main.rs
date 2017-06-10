@@ -1,3 +1,6 @@
+#![feature(try_from)]
+#![recursion_limit = "1024"]
+
 extern crate rayon;
 extern crate reqwest;
 extern crate select;
@@ -5,81 +8,191 @@ extern crate serde;
 extern crate serde_json;
 
 #[macro_use]
+extern crate error_chain;
+
+#[macro_use]
 extern crate serde_derive;
 
 use std::{env, fs};
+use std::convert::TryFrom;
 use std::io::prelude::*;
 use std::path::Path;
+use std::path::PathBuf;
 
 use rayon::prelude::*;
 use reqwest::Url;
 use select::document::Document;
+use select::node::Node;
 use select::predicate::{Class, Name, Predicate};
 
+mod errors {
+    error_chain!{}
+}
+
+use errors::*;
+
 fn main() {
-    let cache_dir = env::var("alfred_workflow_cache").unwrap_or_else(|_| ".cache".into());
-    let cache_path = Path::new(&cache_dir);
-    if !cache_path.exists() {
-        fs::create_dir_all(cache_path).unwrap();
-    }
-    let cache_path_buf = cache_path.to_path_buf();
-
     let query = env::args().nth(1).unwrap();
-    let url = Url::parse_with_params("https://emojipedia.org/search/", &[("q", query)]).unwrap();
-    let res = reqwest::get(url).unwrap();
+    Workflow::new().run(&query);
+}
 
-    let doc = Document::from_read(res).unwrap();
-    let results: Vec<_> = doc.find(Class("search-results").descendant(Name("h2")
-                                                                          .descendant(Name("a"))))
-        .map(|node| {
-                 let href = node.attr("href").unwrap().to_string();
-                 let mut children = node.children();
-                 let emoji = children.next().unwrap().text();
-                 let text = children.next().unwrap().text();
-                 (href, emoji, text)
-             })
-        .collect();
+struct Workflow {
+    current_dir: PathBuf,
+    cache_path_buf: PathBuf,
+}
 
-    let mut items = vec![];
-    let base_url = Url::parse("https://emojipedia.org").unwrap();
-    results
-        .par_iter()
-        .map(|&(ref href, ref emoji, ref text)| {
-            let slug = href.trim_matches('/');
-            let mut file_path = cache_path_buf.clone();
-            file_path.push(slug);
-            file_path.set_extension("png");
+impl Workflow {
+    fn new() -> Self {
+        let current_dir = env::current_dir().unwrap();
 
-            if !file_path.exists() {
-                let url = base_url.join(&href).unwrap();
-                let res = reqwest::get(url).unwrap();
+        let cache_dir = env::var("alfred_workflow_cache").unwrap_or_else(|_| ".cache".into());
+        let cache_path = Path::new(&cache_dir);
+        if !cache_path.exists() {
+            fs::create_dir_all(cache_path).unwrap();
+        }
+        let cache_path_buf = cache_path.to_path_buf();
 
-                let doc = Document::from_read(res).unwrap();
-                let vendor_image = doc.find(Class("vendor-image")).next().unwrap();
-                let img = vendor_image.find(Name("img")).next().unwrap();
-                let src = img.attr("src").unwrap();
+        Workflow {
+            current_dir,
+            cache_path_buf,
+        }
+    }
 
-                let url = Url::parse(src).unwrap();
-                let mut res = reqwest::get(url).unwrap();
-                let mut image = vec![];
-                res.read_to_end(&mut image).unwrap();
-
-                let mut file = fs::File::create(file_path.clone()).unwrap();
-                file.write_all(&image).unwrap();
+    fn run(&self, query: &str) {
+        let items = match self.search_results(query)
+                  .and_then(|results| self.items(results)) {
+            Ok(ref items) if items.is_empty() => {
+                let icon_path = self.current_dir.join("broken_heart.png");
+                vec![Item {
+                         uid: None,
+                         title: "No results found".into(),
+                         arg: None,
+                         icon: Some(Icon { path: icon_path.to_str().unwrap().into() }),
+                     }]
             }
-
-            Item {
-                uid: emoji.clone(),
-                title: text.clone(),
-                arg: emoji.clone(),
-                icon: Icon { path: file_path.to_str().unwrap().into() },
+            Ok(items) => items,
+            Err(e) => {
+                let icon_path = self.current_dir.join("exclamation_point.png");
+                vec![Item {
+                         uid: None,
+                         title: format!("{}", e),
+                         arg: None,
+                         icon: Some(Icon { path: icon_path.to_str().unwrap().into() }),
+                     }]
             }
-        })
-        .collect_into(&mut items);
+        };
 
-    let script_filter = ScriptFilter { items };
-    let json = serde_json::to_string(&script_filter).unwrap();
-    println!("{}", json);
+        let script_filter = ScriptFilter { items };
+        let json = serde_json::to_string(&script_filter).unwrap();
+        println!("{}", json);
+    }
+
+    fn search_results(&self, query: &str) -> Result<Vec<SearchResult>> {
+        let url = Url::parse_with_params("https://emojipedia.org/search/", &[("q", query)])
+            .unwrap();
+        let res = reqwest::get(url)
+            .chain_err(|| "Unable to get search results")?;
+        let doc = Document::from_read(res)
+            .chain_err(|| "Unable to parse search results")?;
+
+        doc.find(Class("search-results").descendant(Name("h2").descendant(Name("a"))))
+            .map(SearchResult::try_from)
+            .collect()
+    }
+
+    fn items(&self, results: Vec<SearchResult>) -> Result<Vec<Item>> {
+        let mut items = vec![];
+        let base_url = Url::parse("https://emojipedia.org").unwrap();
+        results
+            .par_iter()
+            .map(|ref search_result| {
+                let href = &search_result.href;
+                let emoji = &search_result.emoji;
+
+                let file_name = format!("{}.png", href.trim_matches('/'));
+                let cache_path = self.cache(&file_name, || {
+                        let url = base_url.join(&href).unwrap();
+                        let res = reqwest::get(url).chain_err(|| "Unable to fetch emoji")?;
+
+                        let doc = Document::from_read(res)
+                            .chain_err(|| "Unable to parse emoji")?;
+                        let vendor_image = doc.find(Class("vendor-image"))
+                            .next()
+                            .ok_or_else(|| "Unable to find emoji image")?;
+                        let img = vendor_image
+                            .find(Name("img"))
+                            .next()
+                            .ok_or_else(|| "Unable to find emoji image")?;
+                        let src = img.attr("src")
+                            .ok_or_else(|| "Unable to find emoji image")?;
+
+                        let url = Url::parse(src)
+                            .chain_err(|| "Unable to find emoji image")?;
+                        let mut res = reqwest::get(url)
+                            .chain_err(|| "Unable to download emoji image")?;
+                        let mut image = vec![];
+                        res.read_to_end(&mut image)
+                            .chain_err(|| "Unable to save emoji image")?;
+                        Ok(image)
+                    })?;
+
+                let uid = Some(emoji.clone());
+                let title = search_result.text.clone();
+                let arg = Some(emoji.clone());
+                let icon_path = cache_path.to_str().unwrap();
+                let icon = Some(Icon { path: icon_path.into() });
+                Ok(Item {
+                       uid,
+                       title,
+                       arg,
+                       icon,
+                   })
+            })
+            .collect_into(&mut items);
+
+        items.into_iter().collect()
+    }
+
+    fn cache<F>(&self, file_name: &str, f: F) -> Result<PathBuf>
+        where F: Fn() -> Result<Vec<u8>>
+    {
+        let file_path = self.cache_path_buf.join(file_name);
+        if !file_path.exists() {
+            let mut file = fs::File::create(file_path.clone())
+                .chain_err(|| "Unable to create cache file")?;
+            let image = f()?;
+            file.write_all(&image)
+                .chain_err(|| "Unable to write cache file")?;
+        }
+        Ok(file_path)
+    }
+}
+
+struct SearchResult {
+    href: String,
+    emoji: String,
+    text: String,
+}
+
+impl<'a> TryFrom<Node<'a>> for SearchResult {
+    type Error = Error;
+
+    fn try_from(node: Node) -> Result<Self> {
+        let href = node.attr("href")
+            .ok_or_else(|| "Unable to get href")?
+            .to_string();
+        let mut children = node.children();
+        let emoji = children
+            .next()
+            .ok_or_else(|| "Unable to get emoji")?
+            .text();
+        let text = children
+            .next()
+            .ok_or_else(|| "Unable to get text")?
+            .text();
+
+        Ok(SearchResult { href, emoji, text })
+    }
 }
 
 #[derive(Serialize)]
@@ -89,10 +202,10 @@ struct ScriptFilter {
 
 #[derive(Serialize)]
 struct Item {
-    uid: String,
+    uid: Option<String>,
     title: String,
-    arg: String,
-    icon: Icon,
+    arg: Option<String>,
+    icon: Option<Icon>,
 }
 
 #[derive(Serialize)]

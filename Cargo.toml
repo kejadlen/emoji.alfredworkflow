@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Alpha Chen <alpha.chen@gmail.com>"]
 
 [dependencies]
+error-chain = "*"
 rayon = "*"
 reqwest = "*"
 select = "*"

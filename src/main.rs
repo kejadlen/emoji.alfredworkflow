@@ -96,6 +96,7 @@ impl Workflow {
             .flat_map(|node| {
                 node.find(Class("emoji")).next().map(|elem| (node, elem.text()))
             })
+            .take(15)
             .map(|(node, emoji)| {
                 let href = node.attr("href")
                     .ok_or_else(|| "Unable to get href")?

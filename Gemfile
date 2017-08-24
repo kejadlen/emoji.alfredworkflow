@@ -1,9 +1,10 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
-gem 'alphred', '~> 2.0'
-gem 'gemoji', '~> 3.0'
+gem "alphred", "~> 2.0"
+gem "gemoji", "~> 3.0"
 
 group :development do
-  gem 'minitest'
-  gem 'pry'
+  gem "minitest"
+  gem "pry"
+  gem "rake"
 end

@@ -12,6 +12,7 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
+    rake (12.0.0)
     slop (3.6.0)
 
 PLATFORMS
@@ -22,6 +23,7 @@ DEPENDENCIES
   gemoji (~> 3.0)
   minitest
   pry
+  rake
 
 BUNDLED WITH
    1.14.6

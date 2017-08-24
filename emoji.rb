@@ -1,8 +1,8 @@
-$LOAD_PATH.unshift(File.expand_path('../vendor/bundle', __FILE__))
-require 'bundler/setup'
+$LOAD_PATH.unshift(File.expand_path("../vendor/bundle", __FILE__))
+require "bundler/setup"
 
-require 'alphred'
-require 'emoji'
+require "alphred"
+require "emoji"
 
 module Emoji
   class Character
@@ -20,9 +20,9 @@ module Emoji
       Alphred::Item.new(
         title: name,
         uid: name,
-        subtitle: alts.join(', '),
+        subtitle: alts.join(", "),
         arg: raw,
-        icon: File.join(Emoji.images_path, 'emoji', image_filename),
+        icon: File.expand_path("../images/#{image_filename}", __FILE__),
         mods: {
           ctrl: { arg: code, subtitle: "Copy #{code} to pasteboard" }
         },

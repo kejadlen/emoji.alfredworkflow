@@ -1,6 +1,6 @@
 [package]
 name = "emoji-alfredworkflow"
-version = "0.1.0"
+version = "2.0.0"
 authors = ["Alpha Chen <alpha.chen@gmail.com>"]
 
 [dependencies]

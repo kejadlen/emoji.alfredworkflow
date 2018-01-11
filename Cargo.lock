@@ -115,7 +115,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "emoji-alfredworkflow"
-version = "0.1.0"
+version = "2.0.0"
 dependencies = [
  "failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rayon 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",

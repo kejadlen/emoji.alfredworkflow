@@ -4,6 +4,8 @@
 <dict>
 	<key>bundleid</key>
 	<string>com.arbitrarydefinitions.emoji</string>
+	<key>category</key>
+	<string>Internet</string>
 	<key>connections</key>
 	<dict>
 		<key>0744A6DC-F5C1-4D81-8056-8C281A5494D2</key>
@@ -35,6 +37,10 @@
 			<dict>
 				<key>alfredfiltersresults</key>
 				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
 				<key>argumenttype</key>
 				<integer>1</integer>
 				<key>escaping</key>
@@ -110,6 +116,8 @@
 			<integer>170</integer>
 		</dict>
 	</dict>
+	<key>version</key>
+	<string>2.0.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/kejadlen/emoji.alfredworkflow</string>
 </dict>

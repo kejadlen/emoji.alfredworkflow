@@ -39,6 +39,8 @@
 				<false/>
 				<key>alfredfiltersresultsmatchmode</key>
 				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<false/>
 				<key>argumenttrimmode</key>
 				<integer>0</integer>
 				<key>argumenttype</key>
@@ -77,13 +79,13 @@
 			<key>uid</key>
 			<string>0744A6DC-F5C1-4D81-8056-8C281A5494D2</string>
 			<key>version</key>
-			<integer>2</integer>
+			<integer>3</integer>
 		</dict>
 		<dict>
 			<key>config</key>
 			<dict>
 				<key>autopaste</key>
-				<false/>
+				<true/>
 				<key>clipboardtext</key>
 				<string>{query}</string>
 				<key>transient</key>
@@ -94,7 +96,7 @@
 			<key>uid</key>
 			<string>52E6556C-14D2-4D85-8BDD-4B13B2B5943D</string>
 			<key>version</key>
-			<integer>2</integer>
+			<integer>3</integer>
 		</dict>
 	</array>
 	<key>readme</key>

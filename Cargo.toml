@@ -7,11 +7,8 @@ edition = "2018"
 [dependencies]
 failure = "*"
 rayon = "*"
+reqwest = { version = "*", features = ["blocking"] }
 select = "*"
 serde = "1.0"
 serde_derive = "*"
 serde_json = "*"
-
-[dependencies.reqwest]
-version = "*"
-features = ["blocking"]

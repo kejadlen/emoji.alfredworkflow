@@ -10,10 +10,10 @@ extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 
-use std::{env, fs};
 use std::io::prelude::*;
 use std::path::Path;
 use std::path::PathBuf;
+use std::{env, fs};
 
 use failure::*;
 use rayon::prelude::*;
@@ -49,35 +49,32 @@ impl Workflow {
     }
 
     fn run(&self, query: &str) {
-        let items = match self.search_results(query)
+        let items = match self
+            .search_results(query)
             .and_then(|results| self.items(&results))
         {
             Ok(ref items) if items.is_empty() => {
                 let icon_path = self.current_dir.join("broken_heart.png");
-                vec![
-                    Item {
-                        uid: None,
-                        title: "No results found".into(),
-                        arg: None,
-                        icon: Some(Icon {
-                            path: icon_path.to_str().unwrap().into(),
-                        }),
-                    },
-                ]
+                vec![Item {
+                    uid: None,
+                    title: "No results found".into(),
+                    arg: None,
+                    icon: Some(Icon {
+                        path: icon_path.to_str().unwrap().into(),
+                    }),
+                }]
             }
             Ok(items) => items,
             Err(e) => {
                 let icon_path = self.current_dir.join("exclamation_point.png");
-                vec![
-                    Item {
-                        uid: None,
-                        title: format!("{}", e),
-                        arg: None,
-                        icon: Some(Icon {
-                            path: icon_path.to_str().unwrap().into(),
-                        }),
-                    },
-                ]
+                vec![Item {
+                    uid: None,
+                    title: format!("{}", e),
+                    arg: None,
+                    icon: Some(Icon {
+                        path: icon_path.to_str().unwrap().into(),
+                    }),
+                }]
             }
         };
 
@@ -99,7 +96,8 @@ impl Workflow {
                     .map(|elem| (node, elem.text()))
             })
             .map(|(node, emoji)| {
-                let href = node.attr("href")
+                let href = node
+                    .attr("href")
                     .ok_or_else(|| err_msg("Unable to get href"))?
                     .to_string();
                 let mut children = node.children();
@@ -163,14 +161,16 @@ impl Workflow {
         let res = reqwest::blocking::get(url).context("Unable to fetch emoji")?;
 
         let doc = Document::from_read(res).context("Unable to parse emoji")?;
-        let vendor_image = doc.find(Class("vendor-image"))
+        let vendor_image = doc
+            .find(Class("vendor-image"))
             .next()
             .ok_or_else(|| err_msg("Unable to find emoji image"))?;
         let img = vendor_image
             .find(Name("img"))
             .next()
             .ok_or_else(|| err_msg("Unable to find emoji image"))?;
-        let src = img.attr("src")
+        let src = img
+            .attr("src")
             .ok_or_else(|| err_msg("Unable to find emoji image"))?;
 
         let url = Url::parse(src).context("Unable to find emoji image")?;

@@ -89,7 +89,7 @@ impl Workflow {
     fn search_results(&self, query: &str) -> Result<Vec<SearchResult>, Error> {
         let url =
             Url::parse_with_params("https://emojipedia.org/search/", &[("q", query)]).unwrap();
-        let res = reqwest::get(url).context("Unable to get search results")?;
+        let res = reqwest::blocking::get(url).context("Unable to get search results")?;
         let doc = Document::from_read(res).context("Unable to parse search results")?;
 
         doc.find(Class("search-results").descendant(Name("h2").descendant(Name("a"))))
@@ -137,7 +137,7 @@ impl Workflow {
                     icon,
                 })
             })
-            .collect_into(&mut items);
+            .collect_into_vec(&mut items);
 
         items.into_iter().collect()
     }
@@ -160,7 +160,7 @@ impl Workflow {
     fn download_emoji_image(&self, href: &str) -> Result<Vec<u8>, Error> {
         let base_url = Url::parse("https://emojipedia.org").unwrap();
         let url = base_url.join(href).unwrap();
-        let res = reqwest::get(url).context("Unable to fetch emoji")?;
+        let res = reqwest::blocking::get(url).context("Unable to fetch emoji")?;
 
         let doc = Document::from_read(res).context("Unable to parse emoji")?;
         let vendor_image = doc.find(Class("vendor-image"))
@@ -174,7 +174,7 @@ impl Workflow {
             .ok_or_else(|| err_msg("Unable to find emoji image"))?;
 
         let url = Url::parse(src).context("Unable to find emoji image")?;
-        let mut res = reqwest::get(url).context("Unable to download emoji image")?;
+        let mut res = reqwest::blocking::get(url).context("Unable to download emoji image")?;
         let mut image = vec![];
         res.read_to_end(&mut image)
             .context("Unable to save emoji image")?;

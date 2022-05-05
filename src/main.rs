@@ -15,6 +15,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::{env, fs};
 
+use alphred::Item;
 use failure::*;
 use rayon::prelude::*;
 use reqwest::Url;
@@ -55,26 +56,12 @@ impl Workflow {
         {
             Ok(ref items) if items.is_empty() => {
                 let icon_path = self.current_dir.join("broken_heart.png");
-                vec![Item {
-                    uid: None,
-                    title: "No results found".into(),
-                    arg: None,
-                    icon: Some(Icon {
-                        path: icon_path.to_str().unwrap().into(),
-                    }),
-                }]
+                vec![Item::new("No results found").icon(icon_path.as_path())]
             }
             Ok(items) => items,
             Err(e) => {
                 let icon_path = self.current_dir.join("exclamation_point.png");
-                vec![Item {
-                    uid: None,
-                    title: format!("{}", e),
-                    arg: None,
-                    icon: Some(Icon {
-                        path: icon_path.to_str().unwrap().into(),
-                    }),
-                }]
+                vec![Item::new(e.to_string()).icon(icon_path.as_path())]
             }
         };
 
@@ -121,19 +108,11 @@ impl Workflow {
                 let file_name = format!("{}.png", href.trim_matches('/'));
                 let cache_path = self.cache(&file_name, || self.download_emoji_image(href))?;
 
-                let uid = Some(emoji.clone());
+                let uid = emoji.clone();
                 let title = search_result.text.clone();
-                let arg = Some(emoji.clone());
+                let arg = emoji.clone();
                 let icon_path = cache_path.to_str().unwrap();
-                let icon = Some(Icon {
-                    path: icon_path.into(),
-                });
-                Ok(Item {
-                    uid,
-                    title,
-                    arg,
-                    icon,
-                })
+                Ok(Item::new(title).uid(&uid).arg(&arg).icon(icon_path))
             })
             .collect_into_vec(&mut items);
 
@@ -191,17 +170,4 @@ struct SearchResult {
 #[derive(Serialize)]
 struct ScriptFilter {
     items: Vec<Item>,
-}
-
-#[derive(Serialize)]
-struct Item {
-    uid: Option<String>,
-    title: String,
-    arg: Option<String>,
-    icon: Option<Icon>,
-}
-
-#[derive(Serialize)]
-struct Icon {
-    path: String,
 }

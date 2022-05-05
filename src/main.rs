@@ -170,7 +170,7 @@ impl Workflow {
             .next()
             .ok_or_else(|| err_msg("Unable to find emoji image"))?;
         let src = img
-            .attr("src")
+            .attr("data-cfsrc")
             .ok_or_else(|| err_msg("Unable to find emoji image"))?;
 
         let url = Url::parse(src).context("Unable to find emoji image")?;

@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 alphred = "0.1"
-failure = "*"
+anyhow = { version = "1.0.57", features = ["backtrace"] }
 rayon = "*"
 reqwest = { version = "*", features = ["blocking"] }
 select = "*"

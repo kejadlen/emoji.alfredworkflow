@@ -1,12 +1,5 @@
 #![recursion_limit = "1024"]
 
-extern crate failure;
-extern crate rayon;
-extern crate reqwest;
-extern crate select;
-extern crate serde;
-extern crate serde_json;
-
 #[macro_use]
 extern crate serde_derive;
 
@@ -16,7 +9,7 @@ use std::path::PathBuf;
 use std::{env, fs};
 
 use alphred::Item;
-use failure::*;
+use anyhow::{Context, Result};
 use rayon::prelude::*;
 use reqwest::Url;
 use select::document::Document;
@@ -70,7 +63,7 @@ impl Workflow {
         println!("{}", json);
     }
 
-    fn search_results(&self, query: &str) -> Result<Vec<SearchResult>, Error> {
+    fn search_results(&self, query: &str) -> Result<Vec<SearchResult>> {
         let url =
             Url::parse_with_params("https://emojipedia.org/search/", &[("q", query)]).unwrap();
         let res = reqwest::blocking::get(url).context("Unable to get search results")?;
@@ -85,19 +78,19 @@ impl Workflow {
             .map(|(node, emoji)| {
                 let href = node
                     .attr("href")
-                    .ok_or_else(|| err_msg("Unable to get href"))?
+                    .context("Unable to get href")?
                     .to_string();
                 let mut children = node.children();
                 let text = children
                     .nth(1)
-                    .ok_or_else(|| err_msg("Unable to get text"))?
+                    .context("Unable to get text")?
                     .text();
                 Ok(SearchResult { href, emoji, text })
             })
             .collect()
     }
 
-    fn items(&self, results: &[SearchResult]) -> Result<Vec<Item>, Error> {
+    fn items(&self, results: &[SearchResult]) -> Result<Vec<Item>> {
         let mut items = vec![];
         results
             .par_iter()
@@ -119,9 +112,9 @@ impl Workflow {
         items.into_iter().collect()
     }
 
-    fn cache<F>(&self, file_name: &str, f: F) -> Result<PathBuf, Error>
+    fn cache<F>(&self, file_name: &str, f: F) -> Result<PathBuf>
     where
-        F: Fn() -> Result<Vec<u8>, Error>,
+        F: Fn() -> Result<Vec<u8>>,
     {
         let file_path = self.cache_path_buf.join(file_name);
         if !file_path.exists() {
@@ -134,7 +127,7 @@ impl Workflow {
         Ok(file_path)
     }
 
-    fn download_emoji_image(&self, href: &str) -> Result<Vec<u8>, Error> {
+    fn download_emoji_image(&self, href: &str) -> Result<Vec<u8>> {
         let base_url = Url::parse("https://emojipedia.org").unwrap();
         let url = base_url.join(href).unwrap();
         let res = reqwest::blocking::get(url).context("Unable to fetch emoji")?;
@@ -143,14 +136,14 @@ impl Workflow {
         let vendor_image = doc
             .find(Class("vendor-image"))
             .next()
-            .ok_or_else(|| err_msg("Unable to find emoji image"))?;
+            .context("Unable to find emoji image")?;
         let img = vendor_image
             .find(Name("img"))
             .next()
-            .ok_or_else(|| err_msg("Unable to find emoji image"))?;
+            .context("Unable to find emoji image")?;
         let src = img
             .attr("data-cfsrc")
-            .ok_or_else(|| err_msg("Unable to find emoji image"))?;
+            .context("Unable to find emoji image")?;
 
         let url = Url::parse(src).context("Unable to find emoji image")?;
         let mut res = reqwest::blocking::get(url).context("Unable to download emoji image")?;

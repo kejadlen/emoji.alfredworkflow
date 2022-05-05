@@ -5,11 +5,8 @@ authors = ["Alpha Chen <alpha@kejadlen.dev>"]
 edition = "2018"
 
 [dependencies]
-alphred = "0.1"
+alphred = "0.1.11"
 anyhow = { version = "1.0.57", features = ["backtrace"] }
 rayon = "*"
 reqwest = { version = "*", features = ["blocking"] }
 select = "*"
-serde = "1.0"
-serde_derive = "*"
-serde_json = "*"

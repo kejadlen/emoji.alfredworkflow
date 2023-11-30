@@ -70,7 +70,10 @@ fn items(results: &[SearchResult]) -> Result<Vec<Item>> {
             let arg = emoji.clone();
             let icon_path = cached(&file_name, || download_emoji_image(href))?;
 
-            Ok(Item::new(title).uid(&uid).arg(&arg).icon(icon_path.as_path()))
+            Ok(Item::new(title)
+                .uid(&uid)
+                .arg(&arg)
+                .icon(icon_path.as_path()))
         })
         .collect_into_vec(&mut items);
 
